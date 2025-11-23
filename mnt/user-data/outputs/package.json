@@ -1,0 +1,43 @@
+{
+  "name": "tailwind-class-grouper",
+  "version": "1.0.0",
+  "description": "Tools to automatically group and organize Tailwind CSS classes for better readability",
+  "main": "index.js",
+  "scripts": {
+    "test": "jest",
+    "lint": "eslint 'src/**/*.{js,jsx,ts,tsx}'",
+    "lint:fix": "eslint 'src/**/*.{js,jsx,ts,tsx}' --fix",
+    "format": "prettier --write 'src/**/*.{js,jsx,ts,tsx}'",
+    "format:check": "prettier --check 'src/**/*.{js,jsx,ts,tsx}'",
+    "formatter": "node tailwind-class-formatter.js"
+  },
+  "workspaces": [
+    "eslint-plugin-tailwind-group",
+    "prettier-plugin-tailwind-group"
+  ],
+  "devDependencies": {
+    "@babel/parser": "^7.22.0",
+    "@babel/traverse": "^7.22.0",
+    "@typescript-eslint/eslint-plugin": "^6.0.0",
+    "@typescript-eslint/parser": "^6.0.0",
+    "clsx": "^2.0.0",
+    "eslint": "^8.45.0",
+    "eslint-plugin-react": "^7.33.0",
+    "jest": "^29.6.0",
+    "prettier": "^3.0.0",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0"
+  },
+  "keywords": [
+    "tailwind",
+    "tailwindcss",
+    "formatting",
+    "eslint",
+    "prettier",
+    "css",
+    "classes",
+    "organization"
+  ],
+  "author": "Your Name",
+  "license": "MIT"
+}
