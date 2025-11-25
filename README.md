@@ -1,6 +1,6 @@
 # Tailwind Class Grouper Plugins
 
-Automatically organize and group your Tailwind CSS classes for better readability and maintainability. Available as both ESLint and Prettier plugins.
+Automatically organize, group and categorize your Tailwind CSS classes for better readability and maintainability. Available as both ESLint and Prettier plugins.
 
 ## Before & After
 
@@ -55,6 +55,8 @@ yarn add -D prettier-plugin-tailwind-group
 pnpm add -D prettier-plugin-tailwind-group
 ```
 
+> Requires Prettier v3 and assumes `clsx` (or a compatible helper) is available in your project because grouped output is wrapped in `clsx(...)`.
+
 ## Configuration
 
 ### ESLint Configuration
@@ -104,6 +106,7 @@ module.exports = {
   plugins: ['prettier-plugin-tailwind-group'],
   tailwindGroup: true,              // Enable the plugin
   tailwindGroupMinClasses: 4,       // Minimum classes before grouping
+  tailwindGroupIncludeComments: true // Inline category comments (set false to omit)
 };
 ```
 
@@ -113,7 +116,8 @@ Or in `.prettierrc.json`:
 {
   "plugins": ["prettier-plugin-tailwind-group"],
   "tailwindGroup": true,
-  "tailwindGroupMinClasses": 4
+  "tailwindGroupMinClasses": 4,
+  "tailwindGroupIncludeComments": true
 }
 ```
 
@@ -266,6 +270,7 @@ const CLASS_GROUPS = {
 
 ### Classes not being grouped
 
+0. Ensure you are on Prettier v3 (plugin peers on v3) and have `clsx` installed/imported where grouping occurs.
 1. Check that you have at least 4 classes (configurable with `tailwindGroupMinClasses`)
 2. Ensure the plugin is properly installed and configured
 3. Verify that your file extensions are included in the linting/formatting

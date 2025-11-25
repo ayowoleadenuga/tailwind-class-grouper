@@ -13,20 +13,18 @@
     "formatting"
   ],
   "peerDependencies": {
-    "prettier": ">=2.0.0"
+    "prettier": "^3.0.0"
   },
   "dependencies": {
-    "prettier": "^3.0.0",
-    "@babel/parser": "^7.22.0",
     "@babel/traverse": "^7.22.0"
   },
-  "scripts": {
-    "test": "jest"
-  },
-  "author": "Your Name",
+  "author": "Ayowole Adenuga",
   "license": "MIT",
   "repository": {
     "type": "git",
     "url": "https://github.com/ayowoleadenuga/prettier-plugin-tailwind-group"
+  },
+  "devDependencies": {
+    "prettier": "^3.6.2"
   }
 }

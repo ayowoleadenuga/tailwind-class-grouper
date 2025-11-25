@@ -3,8 +3,12 @@
  * Automatically organizes Tailwind CSS classes into logical groups
  */
 
-const { parsers: typescriptParsers } = require('prettier/parser-typescript');
-const { parsers: babelParsers } = require('prettier/parser-babel');
+const babelPlugin = require('prettier/plugins/babel');
+const typescriptPlugin = require('prettier/plugins/typescript');
+const estreePrinter = require('prettier/plugins/estree').printers.estree;
+const { builders } = require('prettier/doc');
+const traverse = require('@babel/traverse').default;
+const { hardline } = builders;
 
 // Define class categories and their patterns
 const CLASS_GROUPS = {
@@ -28,25 +32,15 @@ const CLASS_GROUPS = {
   },
   spacing: {
     comment: '// Spacing',
-    patterns: [
-      /^(m|mx|my|mt|mr|mb|ml|p|px|py|pt|pr|pb|pl|space)-/
-    ]
+    patterns: [/^(m|mx|my|mt|mr|mb|ml|p|px|py|pt|pr|pb|pl|space)-/]
   },
   border: {
     comment: '// Border',
-    patterns: [
-      /^(border|divide|ring|rounded|outline)/,
-      /^(border|divide|ring|outline)-(t|r|b|l|x|y)?-?/
-    ]
+    patterns: [/^(border|divide|ring|rounded|outline)/, /^(border|divide|ring|outline)-(t|r|b|l|x|y)?-?/]
   },
   background: {
     comment: '// Background',
-    patterns: [
-      /^bg-/,
-      /^(from|via|to)-/,
-      /^gradient-to-/,
-      /^backdrop-/
-    ]
+    patterns: [/^bg-/, /^(from|via|to)-/, /^gradient-to-/, /^backdrop-/]
   },
   text: {
     comment: '// Text',
@@ -87,212 +81,183 @@ const CLASS_GROUPS = {
 function categorizeClass(className) {
   for (const [category, config] of Object.entries(CLASS_GROUPS)) {
     if (category === 'others') continue;
-    
+
     for (const pattern of config.patterns) {
       if (pattern.test(className)) {
         return category;
       }
     }
   }
-  
+
   return 'others';
 }
 
 function groupTailwindClasses(classString) {
   const classes = classString.split(/\s+/).filter(Boolean);
   const grouped = {};
-  
-  // Initialize groups
+
+  // Initialize groups to preserve order
   Object.keys(CLASS_GROUPS).forEach(key => {
     grouped[key] = [];
   });
-  
-  // Categorize each class
+
   classes.forEach(className => {
     const category = categorizeClass(className);
     grouped[category].push(className);
   });
-  
-  // Remove empty groups
+
   Object.keys(grouped).forEach(key => {
     if (grouped[key].length === 0) {
       delete grouped[key];
     }
   });
-  
+
   return grouped;
 }
 
 function shouldGroupClasses(classString, options = {}) {
   const classes = classString.split(/\s+/).filter(Boolean);
-  const minClasses = options.tailwindGroupMinClasses || 4;
-  
-  // Don't group if too few classes
+  const minClasses = options.tailwindGroupMinClasses ?? 4;
+
   if (classes.length < minClasses) return false;
-  
-  // Check if already grouped (has newlines)
   if (classString.includes('\n')) return false;
-  
+
   return true;
 }
 
-function formatGroupedClasses(grouped, indent = '    ') {
-  const entries = Object.entries(grouped);
-  const lines = [];
-  
-  entries.forEach(([category, classes], index) => {
-    if (classes.length === 0) return;
-    
-    // Add comment
-    lines.push(`${indent}${CLASS_GROUPS[category].comment}`);
-    
-    // Add classes as a string
-    const classString = `${indent}"${classes.join(' ')}"`;
-    const isLast = index === entries.length - 1;
-    lines.push(classString + (isLast ? '' : ','));
-  });
-  
-  return lines.join('\n');
+function commentValue(comment) {
+  return ` ${comment.replace('//', '').trim()}`;
 }
 
-// AST visitor to transform className attributes
-const visitor = {
-  JSXAttribute(path) {
-    const { node } = path;
-    
-    // Check if this is a className attribute
-    if (!node.name || node.name.name !== 'className') return;
-    
-    // Handle string literal className
-    if (node.value && node.value.type === 'StringLiteral') {
-      const classString = node.value.value;
-      
-      if (!shouldGroupClasses(classString, this.options)) return;
-      
-      const grouped = groupTailwindClasses(classString);
-      const groupCount = Object.keys(grouped).length;
-      
-      if (groupCount > 1) {
-        // Convert to clsx expression
-        const formatted = formatGroupedClasses(grouped);
-        
-        node.value = {
-          type: 'JSXExpressionContainer',
-          expression: {
-            type: 'CallExpression',
-            callee: { type: 'Identifier', name: 'clsx' },
-            arguments: Object.entries(grouped).map(([category, classes], index) => ({
-              type: 'StringLiteral',
-              value: classes.join(' '),
-              leadingComments: [{
-                type: 'CommentLine',
-                value: ` ${CLASS_GROUPS[category].comment.replace('//', '')}`,
-              }]
-            }))
-          }
-        };
-      }
+function buildStringLiteral(value, category) {
+  const literal = {
+    type: 'StringLiteral',
+    value,
+    extra: {
+      rawValue: value,
+      raw: JSON.stringify(value)
     }
-    
-    // Handle clsx() calls
-    if (node.value && node.value.type === 'JSXExpressionContainer') {
-      const expression = node.value.expression;
-      
-      if (
-        expression.type === 'CallExpression' &&
-        expression.callee.name === 'clsx' &&
-        expression.arguments.length === 1 &&
-        expression.arguments[0].type === 'StringLiteral'
-      ) {
-        const classString = expression.arguments[0].value;
-        
-        if (!shouldGroupClasses(classString, this.options)) return;
-        
-        const grouped = groupTailwindClasses(classString);
-        const groupCount = Object.keys(grouped).length;
-        
-        if (groupCount > 1) {
-          // Replace with grouped arguments
-          expression.arguments = Object.entries(grouped).map(([category, classes]) => ({
-            type: 'StringLiteral',
-            value: classes.join(' '),
-            leadingComments: [{
-              type: 'CommentLine',
-              value: ` ${CLASS_GROUPS[category].comment.replace('//', '')}`,
-            }]
-          }));
-        }
-      }
-    }
-  }
-};
+  };
 
-// Prettier plugin exports
-module.exports = {
-  parsers: {
-    typescript: {
-      ...typescriptParsers.typescript,
-      preprocess(text, options) {
-        // Only process if the option is enabled
-        if (!options.tailwindGroup) {
-          return text;
-        }
-        return text;
+  literal.__twCategoryComment = CLASS_GROUPS[category].comment.replace('//', '').trim();
+
+  return literal;
+}
+
+function buildClsxExpression(grouped) {
+  return {
+    type: 'JSXExpressionContainer',
+    expression: {
+      type: 'CallExpression',
+      callee: { type: 'Identifier', name: 'clsx' },
+      arguments: Object.entries(grouped).map(([category, classes]) =>
+        buildStringLiteral(classes.join(' '), category)
+      )
+    }
+  };
+}
+
+function applyTailwindGrouping(ast, options) {
+  traverse(ast, {
+    JSXAttribute(path) {
+      const { node } = path;
+      if (!node.name || node.name.name !== 'className') return;
+      if (!node.value) return;
+
+      if (node.value.type === 'StringLiteral') {
+        const classString = node.value.value;
+
+        if (!shouldGroupClasses(classString, options)) return;
+
+        const grouped = groupTailwindClasses(classString);
+        if (Object.keys(grouped).length <= 1) return;
+
+        node.value = buildClsxExpression(grouped);
       }
-    },
-    babel: {
-      ...babelParsers.babel,
-      preprocess(text, options) {
-        // Only process if the option is enabled
-        if (!options.tailwindGroup) {
-          return text;
+
+      if (node.value.type === 'JSXExpressionContainer') {
+        const expression = node.value.expression;
+
+        if (
+          expression &&
+          expression.type === 'CallExpression' &&
+          expression.callee.type === 'Identifier' &&
+          expression.callee.name === 'clsx' &&
+          expression.arguments.length === 1 &&
+          expression.arguments[0].type === 'StringLiteral'
+        ) {
+          const classString = expression.arguments[0].value;
+
+          if (!shouldGroupClasses(classString, options)) return;
+
+          const grouped = groupTailwindClasses(classString);
+          if (Object.keys(grouped).length <= 1) return;
+
+          expression.arguments = Object.entries(grouped).map(([category, classes]) =>
+            buildStringLiteral(classes.join(' '), category)
+          );
         }
-        return text;
       }
     }
-  },
+  });
+}
+
+function wrapParserWithTransformer(baseParser) {
+  return {
+    ...baseParser,
+    parse(text, options) {
+      const ast = baseParser.parse(text, options);
+      if (options.tailwindGroup) {
+        applyTailwindGrouping(ast, options);
+      }
+      return ast;
+    }
+  };
+}
+
+module.exports = {
   options: {
     tailwindGroup: {
       type: 'boolean',
       category: 'Format',
       default: false,
-      description: 'Group Tailwind CSS classes by category',
+      description: 'Group Tailwind CSS classes by category'
     },
     tailwindGroupMinClasses: {
       type: 'int',
       category: 'Format',
       default: 4,
-      description: 'Minimum number of classes before grouping',
+      description: 'Minimum number of classes before grouping'
+    },
+    tailwindGroupIncludeComments: {
+      type: 'boolean',
+      category: 'Format',
+      default: true,
+      description: 'Include category comments above grouped Tailwind class segments'
     }
+  },
+  parsers: {
+    babel: wrapParserWithTransformer(babelPlugin.parsers.babel),
+    'babel-ts': wrapParserWithTransformer(babelPlugin.parsers['babel-ts']),
+    typescript: wrapParserWithTransformer(typescriptPlugin.parsers.typescript)
   },
   printers: {
     estree: {
+      ...estreePrinter,
       print(path, options, print) {
         const node = path.getValue();
-        
-        // Handle JSXAttribute for className
-        if (node.type === 'JSXAttribute' && node.name && node.name.name === 'className') {
-          if (options.tailwindGroup && node.value) {
-            // Process className value
-            if (node.value.type === 'StringLiteral') {
-              const classString = node.value.value;
-              
-              if (shouldGroupClasses(classString, options)) {
-                const grouped = groupTailwindClasses(classString);
-                const groupCount = Object.keys(grouped).length;
-                
-                if (groupCount > 1) {
-                  // Format as clsx with groups
-                  const formatted = formatGroupedClasses(grouped);
-                  return `className={clsx(\n${formatted}\n  )}`;
-                }
-              }
-            }
-          }
+
+        if (
+          node &&
+          node.type === 'StringLiteral' &&
+          node.__twCategoryComment &&
+          options.tailwindGroupIncludeComments !== false
+        ) {
+          const baseDoc = estreePrinter.print(path, options, print);
+          return ['// ', node.__twCategoryComment, hardline, baseDoc];
         }
-        
-        // Default printing for other nodes
-        return null;
+
+        return estreePrinter.print(path, options, print);
       }
     }
   }
