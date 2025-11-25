@@ -3,115 +3,231 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Tailwind Class Formatter - Interactive Test</title>
+  <title>Tailwind Class Grouper | Docs & Playground</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
+    :root {
+      --bg: #0b1220;
+      --panel: #111827;
+      --border: #1f2937;
+      --accent: #22d3ee;
+      --accent-2: #a855f7;
+      --text: #e5e7eb;
+      --muted: #9ca3af;
+    }
     body {
-      font-family: 'Courier New', monospace;
-      background: #1e1e1e;
-      color: #d4d4d4;
-      padding: 2rem;
+      margin: 0;
+      background: radial-gradient(circle at 20% 20%, rgba(34, 211, 238, 0.08), transparent 25%),
+                  radial-gradient(circle at 80% 0%, rgba(168, 85, 247, 0.12), transparent 30%),
+                  var(--bg);
+      color: var(--text);
+      font-family: 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
+      line-height: 1.6;
     }
     .container {
       max-width: 1200px;
       margin: 0 auto;
+      padding: 2.5rem 1.25rem 4rem;
     }
     .panel {
-      background: #252526;
-      border: 1px solid #3e3e42;
-      border-radius: 8px;
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 12px;
       padding: 1.5rem;
       margin-bottom: 1.5rem;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.35);
     }
-    .input-area {
+    .input-area, .output-area {
       width: 100%;
-      background: #1e1e1e;
-      border: 1px solid #3e3e42;
-      border-radius: 4px;
+      background: #0b1220;
+      border: 1px solid #1f2937;
+      border-radius: 10px;
       padding: 1rem;
-      color: #d4d4d4;
-      font-family: 'Courier New', monospace;
+      color: var(--text);
+      font-family: 'JetBrains Mono', 'Courier New', monospace;
       font-size: 14px;
-      min-height: 100px;
+      min-height: 120px;
       resize: vertical;
     }
     .output-area {
-      background: #1e1e1e;
-      border: 1px solid #3e3e42;
-      border-radius: 4px;
-      padding: 1rem;
-      margin-top: 1rem;
       white-space: pre-wrap;
-      font-size: 14px;
-      min-height: 100px;
+      margin-top: 1rem;
     }
     .btn {
-      background: #0e639c;
-      color: white;
+      background: linear-gradient(135deg, var(--accent), var(--accent-2));
+      color: #0b1220;
       border: none;
-      padding: 0.5rem 1rem;
-      border-radius: 4px;
+      padding: 0.65rem 1.25rem;
+      border-radius: 8px;
       cursor: pointer;
-      font-family: inherit;
-      margin-top: 1rem;
+      font-weight: 600;
+      transition: transform 0.12s ease, box-shadow 0.12s ease;
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      box-shadow: 0 12px 30px rgba(34, 211, 238, 0.25);
     }
-    .btn:hover {
-      background: #1177bb;
-    }
-    .title {
-      color: #4ec9b0;
-      font-size: 1.5rem;
-      margin-bottom: 1rem;
-    }
-    .label {
-      color: #9cdcfe;
-      margin-bottom: 0.5rem;
-      display: block;
+    .btn:hover { transform: translateY(-1px); }
+    .btn:active { transform: translateY(0); }
+    .badge {
+      display: inline-block;
+      background: rgba(34, 211, 238, 0.1);
+      border: 1px solid rgba(34, 211, 238, 0.35);
+      color: #7dd3fc;
+      padding: 0.25rem 0.6rem;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 600;
     }
     .example-btn {
-      background: #3e3e42;
-      color: #d4d4d4;
-      border: 1px solid #555;
-      padding: 0.4rem 0.8rem;
-      border-radius: 4px;
+      background: #1f2937;
+      color: var(--text);
+      border: 1px solid #2d3748;
+      padding: 0.45rem 0.75rem;
+      border-radius: 8px;
       cursor: pointer;
-      margin-right: 0.5rem;
-      margin-bottom: 0.5rem;
-      display: inline-block;
+      margin: 0 0.5rem 0.5rem 0;
       font-size: 12px;
+      transition: border-color 0.15s ease, color 0.15s ease;
     }
     .example-btn:hover {
-      background: #505050;
+      border-color: var(--accent);
+      color: #a5f3fc;
+    }
+    .section-title {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: #e0f2fe;
+      margin-bottom: 0.75rem;
+    }
+    .small-muted { color: var(--muted); font-size: 13px; }
+    footer {
+      text-align: center;
+      color: var(--muted);
+      padding: 2rem 1rem;
+      border-top: 1px solid var(--border);
+      margin-top: 2rem;
+    }
+    footer a.linkedin {
+      color: #67e8f9;
+      text-decoration: none;
+    }
+    footer a.linkedin:hover {
+      text-decoration: underline;
     }
   </style>
 </head>
 <body>
+  <header class="border-b border-slate-800/80 bg-gradient-to-r from-slate-900/70 to-slate-900/30 backdrop-blur">
+    <div class="container" style="padding: 1.5rem 1.25rem;">
+      <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+        <div>
+          <div class="flex items-center gap-2">
+            <span class="badge">OSS</span>
+            <span class="text-slate-400 text-sm">ESLint + Prettier plugins</span>
+          </div>
+          <h1 class="text-3xl font-black text-cyan-100 mt-1">Tailwind Class Grouper</h1>
+          <p class="text-slate-300 mt-1 max-w-3xl">Automatically organize Tailwind CSS classes into semantic groups with inline category comments. Works in ESLint, Prettier, and this live playground.</p>
+        </div>
+        <div class="flex items-center gap-3 flex-wrap">
+          <a class="btn" href="https://github.com/ayowoleadenuga/tailwind-class-grouper" target="_blank" rel="noreferrer">View on GitHub</a>
+          <!-- <span class="text-slate-400 text-sm">Maintained by Ayowole Adenuga</span> -->
+        </div>
+      </div>
+    </div>
+  </header>
+
   <div class="container">
-    <h1 class="title">🎨 Tailwind Class Formatter - Interactive Test</h1>
+    <div class="grid md:grid-cols-2 gap-4 mb-6">
+      <div class="panel">
+        <div class="section-title">Install (ESLint)</div>
+        <pre class="input-area" style="min-height: auto;">npm install --save-dev eslint-plugin-tailwind-group</pre>
+        <p class="small-muted">.eslintrc:</p>
+<pre class="input-area" style="min-height: auto;">{
+  "plugins": ["tailwind-group"],
+  "rules": {
+    "tailwind-group/group-tailwind-classes": [
+      "warn",
+      {
+        "formatInline": false,
+        "useClsx": true
+      }
+    ]
+  }
+}</pre>
+      </div>
+      <div class="panel">
+        <div class="section-title">Install (Prettier)</div>
+        <pre class="input-area" style="min-height: auto;">npm install --save-dev prettier-plugin-tailwind-group</pre>
+        <p class="small-muted">prettier.config.js:</p>
+<pre class="input-area" style="min-height: auto;">module.exports = {
+  plugins: ['prettier-plugin-tailwind-group'],
+  tailwindGroup: true,
+  tailwindGroupMinClasses: 4,
+  tailwindGroupIncludeComments: true // set false to omit inline category comments
+};</pre>
+        <p class="small-muted">Requires Prettier v3 and assumes <code>clsx</code> (or equivalent) is available.</p>
+      </div>
+    </div>
 
     <div class="panel">
-      <label class="label">📥 Input: Paste your Tailwind classes</label>
+      <div class="section-title">Options</div>
+      <ul class="text-slate-200 text-sm leading-7">
+        <li><strong>tailwindGroup</strong> (boolean): enable/disable grouping.</li>
+        <li><strong>tailwindGroupMinClasses</strong> (int): minimum class count before grouping (default 4).</li>
+        <li><strong>tailwindGroupIncludeComments</strong> (boolean): include inline category comments (default true).</li>
+      </ul>
+    </div>
+
+    <div class="panel">
+      <div class="section-title">Class Categories</div>
+      <div class="grid md:grid-cols-2 gap-3 text-sm text-slate-200">
+        <div>
+          <p><strong>Size</strong> – text sizes, w/h, min/max</p>
+          <p><strong>Layout</strong> – flex/grid, position, justify/items</p>
+          <p><strong>Spacing</strong> – margin, padding, space-*</p>
+          <p><strong>Border</strong> – border, ring, outline, rounded</p>
+          <p><strong>Background</strong> – bg-*, gradient, backdrop-*</p>
+        </div>
+        <div>
+          <p><strong>Text</strong> – font, text-*, placeholder-*</p>
+          <p><strong>Effects</strong> – shadow, opacity, transition/animate</p>
+          <p><strong>States & Variants</strong> – hover/focus/dark/responsive</p>
+          <p><strong>Responsive</strong> – sm/md/lg/xl/2xl</p>
+          <p><strong>Others</strong> – unmatched utilities</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="section-title">Playground</div>
+      <label class="text-slate-300 mb-2 block">📥 Input: Paste your Tailwind classes</label>
       <textarea class="input-area" id="input" placeholder="Paste Tailwind classes here...">mt-4 flex items-center justify-between px-6 py-3 bg-white border rounded-lg shadow-sm hover:shadow-md dark:bg-gray-800 text-sm font-medium</textarea>
 
-      <div style="margin-top: 1rem;">
-        <span class="label" style="display: inline; margin-right: 1rem;">Quick Examples:</span>
+      <div class="mt-3">
+        <span class="text-slate-400 mr-3 text-sm">Quick Examples:</span>
         <button class="example-btn" onclick="loadExample(1)">Button</button>
         <button class="example-btn" onclick="loadExample(2)">Card</button>
         <button class="example-btn" onclick="loadExample(3)">Form Input</button>
         <button class="example-btn" onclick="loadExample(4)">Nav Link</button>
       </div>
 
-      <button class="btn" onclick="formatClasses()">✨ Format Classes</button>
+      <button class="btn mt-4" onclick="formatClasses()">✨ Format Classes</button>
 
-      <label class="label" style="margin-top: 1rem;">📤 Output:</label>
+      <label class="text-slate-300 mt-4 block">📤 Output:</label>
       <div class="output-area" id="output">Click "Format Classes" to see the result...</div>
     </div>
 
     <div class="panel">
-      <h2 class="label" style="font-size: 1.2rem;">📊 Class Category Breakdown</h2>
+      <div class="section-title">📊 Class Category Breakdown</div>
       <div class="output-area" id="breakdown">Breakdown will appear here...</div>
     </div>
   </div>
+
+  <footer>
+    Built by <a class="linkedin" href="https://linkedin.com/in/ayowoleadenuga" target="_blank">Ayowole Adenuga</a> · <a href="https://github.com/ayowoleadenuga/tailwind-class-grouper" style="color: #67e8f9;">GitHub</a>
+  </footer>
 
   <script src="tailwind-class-formatter.js"></script>
   <script>
@@ -139,11 +255,9 @@
       }
 
       try {
-        // Format the classes
         const formatted = formatTailwindClasses(input);
         output.textContent = formatted;
 
-        // Show breakdown
         const grouped = groupTailwindClasses(input);
         let breakdownText = '';
 
