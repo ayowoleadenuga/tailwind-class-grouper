@@ -1,6 +1,6 @@
 {
   "name": "prettier-plugin-tailwind-group",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Prettier plugin to automatically group and organize Tailwind CSS classes",
   "main": "index.js",
   "keywords": [
@@ -22,9 +22,10 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/ayowoleadenuga/prettier-plugin-tailwind-group"
+    "url": "https://github.com/ayowoleadenuga/tailwind-class-grouper"
   },
   "devDependencies": {
     "prettier": "^3.6.2"
-  }
+  },
+  "homepage": "https://ayowoleadenuga.github.io/tailwind-class-grouper"
 }

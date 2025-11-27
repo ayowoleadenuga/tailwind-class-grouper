@@ -1,6 +1,6 @@
 {
   "name": "eslint-plugin-tailwind-group",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "ESLint plugin to automatically group and organize Tailwind CSS classes",
   "main": "index.js",
   "keywords": [
@@ -25,6 +25,7 @@
     "eslint": "^8.57.1",
     "jest": "^29.7.0"
   },
+  "homepage": "https://ayowoleadenuga.github.io/tailwind-class-grouper",
   "scripts": {
     "test": "jest"
   },
@@ -32,6 +33,6 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/ayowoleadenuga/eslint-plugin-tailwind-group"
+    "url": "https://github.com/ayowoleadenuga/tailwind-class-grouper"
   }
 }
